@@ -11,7 +11,7 @@ export class JSONDB<T = unknown> {
     const file = await Deno.readTextFile(this.path);
     const json = JSON.parse(file);
 
-    this.data = json as T;
+    this.data = { ...this.data, ...json } as T;
   };
 
   write = async () => {
@@ -23,7 +23,11 @@ export class JSONDB<T = unknown> {
     return status;
   };
 
-  commit = () => {
-    Deno.renameSync(`${ this.path }.tmp`, this.path);
+  commit = async () => {
+    const status = await Deno.rename(`${ this.path }.tmp`, this.path)
+      .then(() => true)
+      .catch(() => false);
+
+    return status;
   };
 }
